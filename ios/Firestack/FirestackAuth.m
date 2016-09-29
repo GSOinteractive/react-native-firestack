@@ -19,7 +19,7 @@ typedef void (^UserWithTokenResponse)(NSDictionary *, NSError *);
 RCT_EXPORT_MODULE(FirestackAuth);
 
 RCT_EXPORT_METHOD(signInAnonymously:
-                  (RCTPromiseResolveBlock) resolve
+                  (RCTResponseSenderBlock) callBack
                   rejecter:(RCTPromiseRejectBlock) reject)
 {
     
@@ -34,7 +34,7 @@ RCT_EXPORT_METHOD(signInAnonymously:
              reject(name, @"" , error);
              return;
          }
-         resolve(user);
+         callBack(@[[NSNull null], user.uid]);
      }];
 }
 
