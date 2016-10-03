@@ -54,17 +54,11 @@ npm install react-native-firestack --save
 
 To use Firestack, we'll need to have a development environment that includes the same prerequisites of Firebase.
 
-Regardless of which linking you choose to run with, it is _very_ important to "embed" the framework `libFirestack.a` in your application. Until we can find an automated way of handling this, *this needs to be done manually*.
+### iOS (with cocoapods)
 
-#### iOS will _not_ be able to find `libFirestack.a` if you forget this step.
+Unfortunately, due to AppStore restrictions, we currently do _not_ package Firebase libraries in with Firestack. However, the good news is we've automated the process (with many thanks to the Auth0 team for inspiration) of setting up with cocoapods. This will happen automatically upon linking the package with `react-native-cli`. 
 
-Find your application tab in Xcode, click on `Build Phases`. In there, find the build phase of `Embed Frameworks` and click the `+` button and add `libFirestack.a` to the list. Make sure the `Code Sign on Copy` checkbox is ticked on and the destination is Frameworks with an empty subpath.
-
-> If you do not see an `Embed Frameworks` build phase, do not fret! Click on the plus button on the build phases menu and select `New Copy Files Phase`. Make sure the destination is set to `Frameworks` and it'll be the same thing as the `Embed Frameworks` phase.
-
-![Embed frameworks](http://d.pr/i/1aZq5.png)
-
-### iOS
+**Remember to use the `ios/[YOUR APP NAME].xcworkspace` instead of the `ios/[YOUR APP NAME].xcproj` file from now on**.
 
 We need to link the package with our development packaging. We have two options to handle linking:
 
@@ -75,8 +69,6 @@ React native ships with a `link` command that can be used to link the projects t
 ```bash
 react-native link react-native-firestack
 ```
-
-Firestack will automatically pull in all of the Firebase requirements and link Firebase to our own project.
 
 #### Manually
 
@@ -98,8 +90,33 @@ If you prefer not to use `rnpm`, we can manually link the package together with 
 
   1. `$(SRCROOT)/../../react-native/React`
   2. `$(SRCROOT)/../node_modules/react-native/React`
+  3. `${PROJECT_DIR}/../../../ios/Pods`
 
 ![Recursive paths](http://d.pr/i/1hAr1.png)
+
+5. Setting up cocoapods
+
+Since we're dependent upon cocoapods (or at least the Firebase libraries being available at the root project -- i.e. your application), we have to make them available for Firestack to find them.
+
+Using cocoapods is the easiest way to get started with this linking. Add or update a `Podfile` at `ios/Podfile` in your app with the following:
+
+```ruby
+source 'https://github.com/CocoaPods/Specs.git'
+[
+  'Firebase/Core',
+  'Firebase/Auth',
+  'Firebase/Storage',
+  'Firebase/Database',
+  'Firebase/RemoteConfig',
+  'Firebase/Messaging'
+].each do |lib|
+  pod lib
+end
+```
+
+Then you can run `(cd ios && pod install)` to get the pods opened. If you do use this route, remember to use the `.xcworkspace` file.
+
+If you don't want to use cocoapods, you don't need to use it! Just make sure you link the Firebase libraries in your project manually. For more information, check out the relevant Firebase docs at [https://firebase.google.com/docs/ios/setup#frameworks](https://firebase.google.com/docs/ios/setup#frameworks).
 
 ### Android
 
@@ -205,7 +222,17 @@ We can pass _custom_ options by passing an object with configuration options. Th
 
 | option           | type | Default Value           | Description                                                                                                                                                                                                                                                                                                                                                      |
 |----------------|----------|-------------------------|----------------------------------------|
-| debug | string/bool | false | When set to true, Firestack will log messages to the console and fire `debug` events we can listen to in `js` |
+| debug | bool | false | When set to true, Firestack will log messages to the console and fire `debug` events we can listen to in `js` |
+| bundleID | string | Default from app `[NSBundle mainBundle]` | The bundle ID for the app to be bundled with |
+| googleAppID | string | "" | The Google App ID that is used to uniquely identify an instance of an app. |
+| databaseURL | string | "" | The database root (i.e. https://my-app.firebaseio.com) |
+| deepLinkURLScheme | string | "" | URL scheme to set up durable deep link service |
+| storageBucket | string | "" | The Google Cloud storage bucket name |
+| androidClientID | string | "" | The Android client ID used in Google AppInvite when an iOS app has it's android version |
+| GCMSenderID | string | "" | The Project number from the Google Developer's console used to configure Google Cloud Messaging |
+| trackingID | string | "" | The tracking ID for Google Analytics |
+| clientID | string | "" | The OAuth2 client ID for iOS application used to authenticate Google Users for signing in with Google |
+| APIKey | string | "" | The secret iOS API key used for authenticating requests from our app |
 
 For instance:
 
@@ -449,10 +476,10 @@ In order to store anything on Firebase, we need to set the storage url provided 
 
 ![Storage url](http://d.pr/i/1lKjQ.png)
 
-The `setStorageUrl()` method accepts a single parameter: your root storage url.
+The `setStorageUrl()` method accepts a single parameter: your root storage url (without leading "gs://").
 
 ```javascript
-firestack.storage.setStorageUrl(`gs://${config.firebase.storageBucket}`)
+firestack.storage.setStorageUrl(`${config.firebase.storageBucket}`)
 ```
 
 If the `storageBucket` key is passed as a configuration option, this method is automatically called by default.

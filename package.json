@@ -1,6 +1,6 @@
 {
   "name": "react-native-firestack",
-  "version": "2.2.3",
+  "version": "2.3.0",
   "author": "Ari Lerner <ari@fullstack.io> (https://fullstackreact.com)",
   "description": "A firebase v3 adapter",
   "main": "index",
@@ -8,6 +8,8 @@
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "build": "./node_modules/.bin/babel --source-maps=true --out-dir=dist .",
     "dev": "npm run compile -- --watch",
+    "lint": "eslint ./src",
+    "publish_pages": "gh-pages -d public/",
     "test": "./node_modules/.bin/mocha"
   },
   "repository": {
@@ -16,8 +18,7 @@
   },
   "jest": {
     "preset": "jest-react-native",
-    "setupFiles": [
-    ],
+    "setupFiles": [],
     "unmockedModulePathPatterns": [
       "./node_modules/react",
       "./node_modules/react-native",
@@ -39,6 +40,10 @@
     "react-native": "*"
   },
   "rnpm": {
+    "commands": {
+      "prelink": "node_modules/react-native-firestack/bin/prepare.sh",
+      "postlink": "node_modules/react-native-firestack/bin/cocoapods.sh"
+    },
     "ios": {
       "project": "ios/Firestack.xcodeproj"
     },
