@@ -25,12 +25,13 @@ RCT_EXPORT_METHOD(signInAnonymously:
     [[FIRAuth auth] signInAnonymouslyWithCompletion
      :^(FIRUser *user, NSError *error) {
          if (!user) {
-             NSString* name = @"";
-             NSString* userInfo = [error userInfo][@"error_name"];
-             if(userInfo){
-                 name = userInfo;
-             }
-             // reject(name, @"" , error);
+             NSDictionary *evt = @{
+                                   @"eventName": @"SignInAnonymouslyError",
+                                   @"msg": [error localizedFailureReason]
+                                   };
+             
+             [self sendJSEvent:AUTH_CHANGED_EVENT props: evt];
+             callBack(@[evt]);
              return;
          }
          callBack(@[[NSNull null], user.uid]);
