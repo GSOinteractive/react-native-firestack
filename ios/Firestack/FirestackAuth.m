@@ -32,7 +32,8 @@ RCT_EXPORT_METHOD(signInAnonymously:
              callBack(@[evt]);
              return;
          }
-         callBack(@[[NSNull null], user.uid]);
+         NSDictionary *userProps = [self userPropsFromFIRUser:user];
+         callBack(@[[NSNull null], userProps]);
      }];
 }
 
