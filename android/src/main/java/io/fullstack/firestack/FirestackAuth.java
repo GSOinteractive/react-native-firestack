@@ -153,7 +153,7 @@ class FirestackAuthModule extends ReactContextBaseJavaModule {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInAnonymously:onComplete:" + task.isSuccessful());
 
-                        if (!task.isSuccessful()) {
+                        if (task.isSuccessful()) {
                             user = task.getResult().getUser();
                             userCallback(user, callback);
                         }else{
